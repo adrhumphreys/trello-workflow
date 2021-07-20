@@ -1,0 +1,12 @@
+AdrHumphreys\Workflow\Workflow:
+  extensions:
+    Trello: AdrHumphreys\Workflow\Services\Trello\TrelloWorkflowExtension
+
+AdrHumphreys\Workflow\WorkflowState:
+  extensions:
+    Trello: AdrHumphreys\Workflow\Services\Trello\TrelloWorkflowStateExtension
+
+
+SilverStripe\CMS\Model\SiteTree:
+  extensions:
+    TrelloDataObjectExtension: AdrHumphreys\Workflow\Services\Trello\TrelloDataObjectExtension
