@@ -18,12 +18,17 @@ class Cards
         ]);
     }
 
-    public static function create(string $title, WorkflowState $state, ?string $editLink = null): ?Card
-    {
+    public static function create(
+        string $title,
+        WorkflowState $state,
+        ?string $editLink = null,
+        ?string $labelId = null
+    ): ?Card {
         $response = TrelloRequest::post(self::CREATE_SINGULAR, [
             'idList' => $state->TrelloId,
             'name' => $title,
             'urlSource' => $editLink,
+            'idLabels' => $labelId,
         ]);
 
         if (!$response || !array_key_exists('id', $response)) {

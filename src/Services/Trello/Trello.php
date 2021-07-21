@@ -4,6 +4,7 @@ namespace AdrHumphreys\Workflow\Services\Trello;
 
 use AdrHumphreys\Workflow\Services\Trello\Models\Board;
 use AdrHumphreys\Workflow\Services\Trello\Models\Card;
+use AdrHumphreys\Workflow\Services\Trello\Models\Label;
 use AdrHumphreys\Workflow\Workflow;
 use AdrHumphreys\Workflow\WorkflowExtension;
 use AdrHumphreys\Workflow\WorkflowState;
@@ -111,7 +112,11 @@ class Trello
 
         // Create a new card other wise we move it
         if (!$item->CardID || !$item->Card()->exists()) {
-            $card = Cards::create($item->Title, $state, $editLink);
+            $labelId = $item instanceof SiteTree
+                ? Label::CMS_PAGE['id']
+                : Label::CMS_ELEMENT['id'];
+            $trelloId = Label::get()->find('InternalId', $labelId)->TrelloId ?? null;
+            $card = Cards::create($item->Title, $state, $editLink, $trelloId);
 
             if (!$card) {
                 return;
@@ -122,5 +127,45 @@ class Trello
         }
 
         Cards::updateCard($item->Card(), $state, $editLink);
+    }
+
+    public static function syncLabels(): void
+    {
+        /** @var Workflow $workFlow */
+        $workFlow = Workflow::get()->first();
+
+        // Only sync if we have an assigned board
+        if (!$workFlow || !$workFlow->BoardID || !$workFlow->Board()->exists()) {
+            return;
+        }
+
+        foreach (Label::LABELS as $config) {
+            $label = Label::get()->find('InternalId', $config['id']);
+
+            if (!$label) {
+                $label = Label::create();
+            }
+
+            if ($label->TrelloId && strlen($label->TrelloId) > 0) {
+                continue;
+            }
+
+            $label->Title = $config['name'];
+            $label->InternalId = $config['id'];
+            $label->write();
+
+            $labelRes = Labels::create(
+                $config['name'],
+                $config['color'],
+                $workFlow->Board()->BoardId
+            );
+
+            if (!$labelRes || !array_key_exists('id', $labelRes)) {
+                continue;
+            }
+
+            $label->TrelloId = $labelRes['id'];
+            $label->write();
+        }
     }
 }
