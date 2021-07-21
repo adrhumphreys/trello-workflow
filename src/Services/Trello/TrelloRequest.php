@@ -6,7 +6,7 @@ use GuzzleHttp\Psr7\Request;
 
 class TrelloRequest extends Request
 {
-    public static function get(string $url, ?array $queryParams = null): array
+    public static function get(string $url, ?array $queryParams = null): ?array
     {
         $request = new TrelloRequest('GET', $url);
         $response = Client::create()->send($request, $queryParams);
@@ -15,7 +15,7 @@ class TrelloRequest extends Request
         return json_decode($contents, true);
     }
 
-    public static function post(string $url, ?array $queryParams = null): array
+    public static function post(string $url, ?array $queryParams = null): ?array
     {
         $request = new TrelloRequest('POST', $url);
         $response = Client::create()->send($request, $queryParams);

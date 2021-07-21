@@ -43,18 +43,18 @@ class Client
 
     public function send(Request $request, ?array $queryParams = null): ResponseInterface
     {
+        $workflow = Workflow::get()->first();
+
+        if (!$workflow && !array_key_exists('key', $queryParams) && !array_key_exists('token', $queryParams)) {
+            throw new \InvalidArgumentException('We need a workflow with an associated trello service');
+        }
+
         try {
-            $workflow = Workflow::get()->find('Service', Trello::class);
-
-            if (!$workflow) {
-                throw new \InvalidArgumentException('We need a workflow with an associated trello service');
-            }
-
             $response = $this->getClient()->send($request, [
                 RequestOptions::TIMEOUT => self::API_TIMEOUT,
                 RequestOptions::QUERY => array_merge_recursive($queryParams ?? [], [
-                    'key' => $workflow->TrelloKey,
-                    'token' => $workflow->TrelloToken,
+                    'key' => $queryParams['key'] ?? $workflow->TrelloKey,
+                    'token' => $queryParams['token'] ?? $workflow->TrelloToken,
                 ])
             ]);
         } catch (Throwable $e) {

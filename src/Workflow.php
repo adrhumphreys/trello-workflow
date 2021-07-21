@@ -2,13 +2,20 @@
 
 namespace AdrHumphreys\Workflow;
 
+use AdrHumphreys\Workflow\Services\Trello\Models\Board;
 use AdrHumphreys\Workflow\Services\Trello\Trello;
-use DNADesign\Elemental\Models\BaseElement;
-use SilverStripe\CMS\Model\SiteTree;
-use SilverStripe\Forms\DropdownField;
 use SilverStripe\Forms\FieldList;
 use SilverStripe\ORM\DataObject;
+use SilverStripe\ORM\HasManyList;
 
+/**
+ * @property string Title
+ * @property string TrelloToken
+ * @property string TrelloKey
+ * @property int BoardID
+ * @method Board Board
+ * @method WorkflowState[]|HasManyList States
+ */
 class Workflow extends DataObject
 {
     private static string $singular_name = 'Workflow';
@@ -19,11 +26,12 @@ class Workflow extends DataObject
 
     private static array $db = [
         'Title' => 'Varchar(255)',
-        // This is the service that's selected, allowing us to in the future have multiple
-        // services associated with the CMS. E.g. we might use Trello or JIRA
-        'Service' => 'Varchar(255)',
-        // The type of model to apply the workflow to
-        'Type' => 'Varchar(255)',
+        'TrelloToken' => 'Varchar(255)',
+        'TrelloKey' => 'Varchar(255)',
+    ];
+
+    private static array $has_one = [
+        'Board' => Board::class,
     ];
 
     private static array $has_many = [
@@ -33,36 +41,22 @@ class Workflow extends DataObject
     public function getCMSFields(): FieldList
     {
         $fields = parent::getCMSFields();
-        $fields->removeByName([
-            'Service',
-        ]);
 
-        $fields->addFieldsToTab('Root.Main', [
-            DropdownField::create('Service', 'Service', $this->getServices()),
-            DropdownField::create('Type', 'Type', $this->getTypes()),
-        ]);
+        if (Board::get()->count() === 0) {
+            $fields->removeByName('BoardID');
+        }
 
         return $fields;
     }
 
-    /*
-     * TODO: Implement a "gathering" mechanism for implementations of Service
-     */
-    public function getServices(): array
+    protected function onAfterWrite(): void
     {
-        return [
-            Trello::class => 'Trello',
-        ];
-    }
+        parent::onBeforeWrite();
 
-    /*
-     * TODO: Implement a "gathering" mechanism for types to apply (perhaps config)
-     */
-    public function getTypes(): array
-    {
-        return [
-            SiteTree::class => 'Pages',
-            BaseElement::class => 'Blocks (elements)',
-        ];
+        if (!$this->TrelloKey || !$this->TrelloToken) {
+            return;
+        }
+
+        Trello::syncBoards($this->TrelloKey, $this->TrelloToken);
     }
 }
