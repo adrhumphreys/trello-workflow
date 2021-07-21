@@ -17,11 +17,11 @@ class SyncServiceTask extends BuildTask
     public function run($request): void
     {
         self::log('syncing states');
-//        Trello::syncWorkflowStates();
+        // Trello::syncWorkflowStates();
         self::log('states synced');
 
         self::log('syncing cards');
-//        Trello::syncCards();
+        // Trello::syncCards();
         self::log('cards synced');
 
         self::log('syncing labels');

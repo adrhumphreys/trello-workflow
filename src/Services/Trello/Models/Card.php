@@ -2,6 +2,7 @@
 
 namespace AdrHumphreys\Workflow\Services\Trello\Models;
 
+use AdrHumphreys\Workflow\Services\Trello\Trello;
 use AdrHumphreys\Workflow\WorkflowState;
 use SilverStripe\ORM\DataObject;
 
@@ -30,4 +31,18 @@ class Card extends DataObject
         'State' => WorkflowState::class,
         'Owner' => DataObject::class,
     ];
+
+    public function onAfterWrite(): void
+    {
+        $owner = $this->Owner();
+        $workflowState = $this->State();
+
+        foreach ([$owner, $workflowState] as $check){
+            if (!($check && $check->exists())) {
+                return;
+            }
+        }
+
+        Trello::syncToState($owner, $workflowState);
+    }
 }

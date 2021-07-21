@@ -1,3 +1,6 @@
+---
+Name: trello-workflow
+---
 SilverStripe\CMS\Model\SiteTree:
   extensions:
     WorkflowExtension: AdrHumphreys\Workflow\WorkflowExtension
@@ -5,3 +8,11 @@ SilverStripe\CMS\Model\SiteTree:
 DNADesign\Elemental\Models\BaseElement:
   extensions:
     WorkflowExtension: AdrHumphreys\Workflow\WorkflowExtension
+
+SilverStripe\Admin\LeftAndMain:
+  extra_requirements_javascript:
+    - 'adrhumphreys/trello-workflow: client/dist/js/bundle.js'
+
+SilverStripe\Control\Director:
+  rules:
+    trello-workflow: AdrHumphreys\Workflow\WorkflowController
