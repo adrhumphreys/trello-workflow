@@ -21,11 +21,11 @@ class SyncServiceTask extends BuildTask
         self::log('states synced');
 
         self::log('syncing cards');
-//        Trello::syncCards();
+        Trello::syncCards();
         self::log('cards synced');
 
         self::log('syncing labels');
-        Trello::syncLabels();
+//        Trello::syncLabels();
         self::log('cards synced');
     }
 

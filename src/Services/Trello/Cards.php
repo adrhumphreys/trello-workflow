@@ -39,6 +39,7 @@ class Cards
         $card->Title = $title;
         $card->StateID = $state->ID;
         $card->TrelloId = $response['id'];
+        $card->CardUrl = $response['url'];
         $card->write();
 
         return $card;
