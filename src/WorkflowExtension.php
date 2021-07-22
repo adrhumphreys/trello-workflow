@@ -8,6 +8,7 @@ use DNADesign\Elemental\Models\BaseElement;
 use SilverStripe\CMS\Model\SiteTree;
 use SilverStripe\Forms\DropdownField;
 use SilverStripe\Forms\FieldList;
+use SilverStripe\Forms\LiteralField;
 use SilverStripe\ORM\DataExtension;
 
 /**
@@ -44,6 +45,13 @@ class WorkflowExtension extends DataExtension
             )
                 ->setEmptyString('No workflow'),
         ]);
+
+        if ($currentStateId > 0) {
+            $fields->addFieldToTab('Root.Main', LiteralField::create('WorkflowLink', sprintf(
+                '<a class="btn btn-primary" href="%s" target="_blank">Go to card in Trello</a><br><br>',
+                $this->owner->Card()->CardUrl,
+            )));
+        }
     }
 
     public function onBeforeWrite(): void
